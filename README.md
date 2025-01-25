@@ -1,6 +1,6 @@
 # PumpSniper
 
-A high-performance sniper tool for pump.fun tokens, designed to execute trades with minimal latency by monitoring dev wallet addresses. Written in native JS and HTML for speed comptetitiveness. Let me know if any isssues, this is just first draft
+A high-performance sniper tool for pump.fun tokens, designed to execute trades with minimal latency by monitoring dev wallet addresses. Written in native JS and HTML for speed comptetitiveness. Let me know if any isssues, this is just first draft. One of main advantages is that it uses a custom websocket feed, which is faster than the pump
 
 ## Overview
 
