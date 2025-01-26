@@ -251,7 +251,7 @@ class TokenSniper {
             // Get trade settings
             const defaultSettings = {
                 amount: 0.1,
-                slippage: 1,
+                slippage: 100,
                 priorityFee: 0.005,
                 denominatedInSol: "true",
                 pool: "pump",
