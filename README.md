@@ -1,43 +1,77 @@
 # PumpSniper
 
-A high-performance sniper tool for pump.fun tokens, designed to execute trades with minimal latency by monitoring dev wallet addresses. Written in native JS and HTML for speed comptetitiveness. Let me know if any isssues, this is just first draft. One of main advantages is that it uses a custom websocket feed, which is faster than the pump
+A high-performance token sniping tool for pump.fun, leveraging a custom WebSocket connections for real-time token monitoring and automated trading execution. Built with vanilla JavaScript and HTML for optimal speed performance.
 
 ## Overview
 
-PumpSniper provides a no-code solution for sniping tokens on pump.fun, often executing trades before they even appear on the pump.fun UI. This is achieved through an advanced backend system that intelligently routes transactions through the most optimal providers (including Jito, NextBlock, and others).
-**Sniping Criteria**: Snipe by: Dev wallet address, Token Symbol (If you know one is launching soon, set the symbol) , or token name (for instance if you want to snipe all tokens with "AI", put AI in the token name.) You can set multiple dev wallets or other criteria by entering one per line. 
+PumpSniper enables automated token sniping on pump.fun through a custom monitoring system that tracks new token launches based on multiple criteria. The system utilizes a custom WebSocket feed for real-time updates, providing faster execution compared to traditional UI-based monitoring. Typically you can snipe tokens before they even appear on pump.fun. 
 
-## Key Features
+Q: Why cant I import my owm wallet? 
+The transactions and feed use paid services like geyser RPCs which are costly and limit to one IP address to use. Unless you have these, you would not be able to execute at the same speeds as this repo. I have made a custom backend for streaming token feed and execution, and each wallet generated is correlated with a custom API key. You can still import generated wallets to phantom and use them as you normally would to transfer assets out after sniping or perform swaps on phantom / jupiter. Ensure to backup generated wallets since we do not have access to recover keypairs. 
 
-- **Ultra-Fast Execution**: Snipe tokens near-instantly by monitoring dev wallet addresses
-- **Smart Route Optimization**: Automatically routes transactions through the best available provider
-- **Provider Support**:
-  - Jito
-  - NextBlock
-  - Additional providers based on network conditions
-- **User-Friendly Interface**: No coding required - simple UI for setting up and executing snipes
-- **Real-time Monitoring**: Track transactions and network status through an intuitive dashboard
+## Sniping Criteria
+
+The system supports three distinct sniping methods that can be used individually or in combination:
+
+1. **Dev Wallet Monitoring**
+   - Track specific wallet addresses known for launching tokens
+   - Instant detection of new token deployments from monitored addresses
+   - Multiple wallet addresses can be monitored simultaneously (one per line)
+
+2. **Token Name Matching**
+   - Case-insensitive partial matching of token names
+   - Example: Entering "AI" will match tokens containing "AI", "ai", "Ai", etc.
+   - Useful for targeting specific token themes or categories
+   - Multiple name patterns can be monitored (one per line)
+
+3. **Symbol Matching**
+   - Case-sensitive exact matching of token symbols
+   - Particularly useful when specific token symbols are known in advance
+   - Multiple symbols can be monitored (one per line)
+
+## How to Use
+
+1. **Initial Setup**
+   - Open index.html in your browser to launch the interface
+   - Use the Wallet Manager to generate a wallet
+   - Configure your trade settings (amount, slippage, priority fee) and click update.
+
+2. **Configure Sniping Parameters**
+   - In the Sniper window, enter your target criteria:
+     - Dev wallet addresses (one per line)
+     - Token names to match (one per line)
+     - Token symbols to match (one per line)
+
+     You do not have to have all of them set. For instance if youw want to just a list of 10 dev addresses when they deploy a new token, just leave the others blank. 
+
+3. **Trade Settings Configuration**
+   - Set your trade amount in SOL
+   - Configure slippage tolerance percentage (reccomend leaving at 100% , since price fluctuations are extreme during low market cap.)
+   - Set priority fee for transaction execution (usually 0.005 is enough but set higher if you really want to get in as fast as possible)
+   - Click "Update Settings" to save
+
+4. **Monitoring and Execution**
+   - Click "Activate Sniper" to begin monitoring
+   - Monitor real-time status in the Token Monitor window
+   - The system will automatically execute trades when criteria are met
+
+## Technical Details
+
+- **Transaction Routing**: Intelligent routing through multiple providers (Jito, NextBlock)
+- **WebSocket Feed**: Custom implementation for real-time token monitoring
+- **Local Storage**: Persistent storage of wallet data and trade settings
+- **Error Handling**: Comprehensive error checking and validation for trade parameters
 
 ## Requirements
 
-- Sufficient SOL balance to cover:
-  - Priority fees (variable based on network conditions)
-  - Jito fees (variable based on network conditions)
-  - Transaction amount
+- Modern web browser with JavaScript enabled
+- Sufficient SOL balance for:
+  - Trade amounts
+  - Priority fees (network-dependent)
+  - Transaction fees
 
-## How It Works
+## Notes
 
-1. Enter the dev wallet address you want to monitor
-2. Configure your trade settings (amount, slippage, priority fee) and click save
-3. Activate the sniper
-4. The system will detect new mints from the dev wallet and execute trades near instantly
-
-## Coming Soon
-
-- Enhanced sniping criteria (based on symbol or token name)
-- Additional monitoring parameters
-- Advanced filtering options
-
-## Note
-
-Network conditions can affect priority and Jito fees. Always ensure you have sufficient SOL balance to cover these variable costs for successful transaction execution.
+- Priority and transaction fees vary based on network conditions
+- Maintain adequate SOL balance for successful trade execution
+- Monitor the Token Monitor window for real-time status updates and transaction logs
