@@ -3,7 +3,7 @@ class PumpTrader {
         // Default settings
         this.defaultSettings = {
             amount: 0.1,
-            slippage: 1, // 1%
+            slippage: 100, // 1%
             priorityFee: 0.005,
             denominatedInSol: "true",
             pool: "pump",
