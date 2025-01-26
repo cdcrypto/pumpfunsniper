@@ -1,6 +1,10 @@
 # PumpSniper
 
-A high-performance token sniping tool for pump.fun, leveraging a custom WebSocket connections for real-time token monitoring and automated trading execution. Built with vanilla JavaScript and HTML for optimal speed performance.
+A high-performance token sniping tool for pump.fun, leveraging a custom WebSocket connections for real-time token monitoring and automated trading execution. Built with vanilla JavaScript and HTML for optimal speed performance. Was created since I tried to find a fast sniper to compete with some of the better snipers on chain, but most require investing 1000s of dollars in infrastructure (Geyser websockets etc..) , and require extensive knowledge in transaction sending. This is aimed to be an easy setup, and can start sniping at competitive speeds within minutes when you need it for a token launch or new "meta". 
+
+Example: You know a certain dev or a coin with a certain symbol / name is launching. To snipe this coin near immediately, just 1. Generate wallet 2. Add SOL to wallet based on how much you want to buy 3. Update settings (amount and slippage and priority fees) 4. Add dev wallet, or token name to sniping criteria and click enable sniping. After this, it will buy immediately when matching token is launched on pump.fun 
+
+Note: will add balances and transaction log in near future.
 
 ## Overview
 
