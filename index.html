@@ -84,8 +84,24 @@
       box-shadow: inset -1px -1px #999;
       cursor: pointer;
     }
+    /* Window control hover effects */
     .window-button:hover {
       background: #E0E0E0;
+    }
+    .minimize-button:hover {
+      background: #C0C0C0 url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTZweCIgaGVpZ2h0PSIxNnB4IiB2aWV3Qm94PSIwIDAgMTYgMTYiIHZlcnNpb249IjEuMSI+PHJlY3QgeT0iNyIgd2lkdGg9IjE2IiBoZWlnaHQ9IjIiIGZpbGw9ImJsYWNrIi8+PC9zdmc+') center no-repeat;
+      background-size: 10px 2px;
+      filter: brightness(0.9);
+    }
+    .maximize-button:hover {
+      background: #C0C0C0 url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTZweCIgaGVpZ2h0PSIxNnB4IiB2aWV3Qm94PSIwIDAgMTYgMTYiIHZlcnNpb249IjEuMSI+PHJlY3Qgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIi8+PC9zdmc+') center no-repeat;
+      background-size: 12px 12px;
+      filter: brightness(0.9);
+    }
+    .close-button:hover {
+      background: #C0C0C0 url('data:image/gif;base64,R0lGODlhEAAQALMAAP///zMzM5mZmQAAAMzMzDMzMwAzMwDAzIyMDMDAwP///////yH5BAAAAAAALAAAAAAQABAAAARX8MhJpy+0Po5y02ouzPdDr9pFaOgKAeCJTQUySshESwGPdAMAkYMCVAgxU29MBzk6Iew5gbkcHFlKqwrCNUvCrZQCqZyzeU1v4DvU1EAADs=') center no-repeat;
+      background-size: 12px 12px;
+      filter: brightness(0.9);
     }
 
     /* We define three special buttons: minimize, maximize, close */
@@ -106,12 +122,27 @@
       padding: 8px 12px;
       border-top: 2px solid #FFF;
       border-top-color: #999;
-      min-height: 80px;
+      height: calc(100% - 40px); /* Adjust for title bar height */
       overflow: auto;
     }
 
+    /* Resizer styling */
     .resizer {
-      display: none; /* Hide the resizer for this static layout */
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 16px;
+      height: 16px;
+      background: #C0C0C0;
+      border-top: 2px solid #FFF;
+      border-left: 2px solid #FFF;
+      cursor: se-resize;
+      display: block;
+    }
+
+    /* Window focus indicator */
+    .window:focus-within {
+      box-shadow: 0 0 0 2px #000080;
     }
 
     /* For minimized windows, we can hide .window-content. We'll handle
@@ -151,12 +182,11 @@
       border-bottom-color: #999;
       border-right-color: #999;
       box-shadow: inset -1px -1px #999;
-      min-height: 100px;
       padding: 8px;
       overflow: auto;
       font-family: "Courier New", monospace;
       white-space: pre-wrap;
-      max-height: 200px;
+      height: calc(100% - 60px); /* Adjust for header height */
     }
 
     /**********************************************
@@ -342,9 +372,9 @@
       <div class="window-title">
         <div class="window-title-text">Token Monitor</div>
         <div class="window-controls">
-          <div class="window-button minimize-button"></div>
-          <div class="window-button maximize-button"></div>
-          <div class="window-button close-button"></div>
+          <div class="window-button minimize-button" title="Minimize"></div>
+          <div class="window-button maximize-button" title="Maximize"></div>
+          <div class="window-button close-button" title="Close"></div>
         </div>
       </div>
       <div class="window-content">
@@ -421,8 +451,8 @@
       </div>
       <div class="window-content">
         <div id="wallet-status" title="Click to copy">No wallet found</div>
-        <div id="qr-container" style="display: none; text-align: center; margin: 10px 0;">
-          <canvas id="qr-code"></canvas>
+        <div id="qr-container" style="display: none; text-align: center; margin: 10px 0; min-height: 128px;">
+          <div id="qr-code" style="display: inline-block;"></div>
         </div>
         <div class="button-container" style="display: flex; gap: 8px;">
           <button id="generate-wallet" class="retro-button">Generate Wallet</button>
@@ -445,13 +475,28 @@
       <div class="window-content">
         <div class="settings-form">
           <div class="form-group">
-            <label>Dev Wallet Address</label>
-            <input
-              type="text"
+            <label>Dev Wallet Addresses</label>
+            <textarea
               id="dev-wallet"
               class="retro-input"
-              placeholder="Enter dev wallet address"
-            >
+              placeholder="Enter dev wallet addresses (one per line)"
+              style="height: 80px; resize: vertical;"
+            ></textarea>
+            <div style="margin-top: 4px; font-size: 11px; color: #666;">
+              Add each wallet address on a new line
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Token Names to Snipe</label>
+            <textarea
+              id="token-names"
+              class="retro-input"
+              placeholder="Enter token names to snipe (one per line)"
+              style="height: 80px; resize: vertical;"
+            ></textarea>
+            <div style="margin-top: 4px; font-size: 11px; color: #666;">
+              Add each token name on a new line (case insensitive)
+            </div>
           </div>
           <div class="status-container">
             <div id="sniper-status" class="status-text">Status: Inactive</div>
@@ -466,14 +511,14 @@
   <div class="taskbar">
     <div class="left-buttons">
       <div class="start-button">Start</div>
-      <div class="taskbar-button">
+      <div class="taskbar-button" data-window="wallet-manager" title="Open Wallet Manager">
         <div class="tray-icon">W</div>
         Wallet
       </div>
-      <div class="taskbar-button">
+      <div class="taskbar-button" data-window="trade-settings" title="Open Trade Settings">
         Trade
       </div>
-      <div class="taskbar-button">
+      <div class="taskbar-button" data-window="sniper-window" title="Open Token Sniper">
         Sniper
       </div>
     </div>
@@ -492,7 +537,9 @@
     /* Simple clock update for the taskbar */
     function updateClock() {
       const now = new Date();
-      document.getElementById('system-clock').textContent = now.toLocaleTimeString();
+      const time = now.toLocaleTimeString();
+      const date = now.toLocaleDateString();
+      document.getElementById('system-clock').textContent = `${date} ${time}`;
     }
     setInterval(updateClock, 1000);
     updateClock();
@@ -502,7 +549,19 @@
      **********************************************/
     let currentZIndex = 100; // so that the front window gets a higher z-index
 
+    // Add resizer functionality
     document.querySelectorAll('.window').forEach((win) => {
+      // Add resizer element
+      const resizer = document.createElement('div');
+      resizer.className = 'resizer';
+      win.appendChild(resizer);
+
+      // Make windows focusable
+      win.setAttribute('tabindex', '-1');
+      win.addEventListener('mousedown', () => {
+        win.focus();
+      });
+
       const titleBar = win.querySelector('.window-title');
 
       // Bring window to front on mousedown
@@ -536,13 +595,54 @@
         e.preventDefault(); // prevent text selection
       });
 
+      // Window snapping
       document.addEventListener('mousemove', (e) => {
         if (!isDragging) return;
         // Calculate new position
         const dx = e.clientX - startX;
         const dy = e.clientY - startY;
-        win.style.left = (winX + dx) + 'px';
-        win.style.top = (winY + dy) + 'px';
+        const newLeft = winX + dx;
+        const newTop = winY + dy;
+        
+        const rect = win.getBoundingClientRect();
+        const snapThreshold = 20;
+        const screenWidth = window.innerWidth;
+        const screenHeight = window.innerHeight;
+
+        // Snap to edges
+        if (newLeft < snapThreshold) win.style.left = '0px';
+        else if (newLeft + rect.width > screenWidth - snapThreshold) 
+          win.style.left = (screenWidth - rect.width) + 'px';
+        else win.style.left = newLeft + 'px';
+
+        if (newTop < snapThreshold) win.style.top = '0px';
+        else if (newTop + rect.height > screenHeight - snapThreshold)
+          win.style.top = (screenHeight - rect.height) + 'px';
+        else win.style.top = newTop + 'px';
+      });
+
+      // Resizer functionality
+      let isResizing = false;
+      resizer.addEventListener('mousedown', (e) => {
+        isResizing = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        const rect = win.getBoundingClientRect();
+        winX = rect.width;
+        winY = rect.height;
+        e.preventDefault();
+      });
+
+      document.addEventListener('mousemove', (e) => {
+        if (!isResizing) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        win.style.width = (winX + dx) + 'px';
+        win.style.height = (winY + dy) + 'px';
+      });
+
+      document.addEventListener('mouseup', () => {
+        isResizing = false;
       });
 
       document.addEventListener('mouseup', () => {
@@ -577,7 +677,22 @@
         win.style.display = 'none';
       });
     });
+
+    // Taskbar window management
+    document.querySelectorAll('.taskbar-button').forEach((button) => {
+      button.addEventListener('click', () => {
+        const windowId = button.getAttribute('data-window');
+        const window = document.getElementById(windowId);
+        if (window) {
+          if (window.classList.contains('minimized')) {
+            window.classList.remove('minimized');
+            window.style.display = 'block';
+          } else {
+            window.classList.add('minimized');
+          }
+        }
+      });
+    });
   </script>
 </body>
 </html>
-

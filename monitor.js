@@ -74,6 +74,7 @@ class WebSocketMonitor {
         this.queue = new MessageQueue();
         this.performance = new PerformanceMonitor();
         this.messagesContainer = document.getElementById('messages');
+        this.logCounter = 0;
         
         // Add startup message
         const startupMsg = document.createElement('div');
@@ -135,6 +136,11 @@ class WebSocketMonitor {
         this.ws.onmessage = (event) => {
             const receiveTime = performance.now();
             try {
+                this.logCounter++;
+                if (this.logCounter >= 20) {
+                    console.clear();
+                    this.logCounter = 0;
+                }
                 console.log('Received WebSocket message:', event.data);
                 const data = JSON.parse(event.data);
                 this.handleMessage(data, receiveTime);

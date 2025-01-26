@@ -1,23 +1,48 @@
 class WalletManager {
     constructor() {
-        this.loadQRCodeScript();
         this.wallet = this.loadWallet();
         this.setupUI();
+        // Load QR code script immediately
+        this.loadQRCodeScript().catch(error => {
+            console.error('Failed to load QR code script:', error);
+        });
     }
 
     loadQRCodeScript() {
         return new Promise((resolve, reject) => {
-            if (window.QRCode) {
-                resolve();
-                return;
+            try {
+                // If QRCode is already available, resolve immediately
+                if (typeof QRCode !== 'undefined') {
+                    resolve();
+                    return;
+                }
+
+                // Check if script is already being loaded
+                const existingScript = document.getElementById('qrcode-script');
+                if (existingScript) {
+                    existingScript.addEventListener('load', () => {
+                        // Give a small delay for script initialization
+                        setTimeout(resolve, 100);
+                    });
+                    return;
+                }
+
+                // Create and load the script
+                const script = document.createElement('script');
+                script.id = 'qrcode-script';
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+                script.async = true;
+
+                script.onload = () => {
+                    // Give a small delay for script initialization
+                    setTimeout(resolve, 100);
+                };
+                script.onerror = () => reject(new Error('Failed to load QR Code script'));
+
+                document.head.appendChild(script);
+            } catch (error) {
+                reject(error);
             }
-            
-            const script = document.createElement('script');
-            script.id = 'qrcode-script';
-            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
-            script.onload = () => resolve();
-            script.onerror = () => reject(new Error('Failed to load QR Code script'));
-            document.head.appendChild(script);
         });
     }
 
@@ -130,36 +155,65 @@ class WalletManager {
             const qrContainer = document.getElementById('qr-container');
             const toggleQRButton = document.getElementById('toggle-qr');
             
-            if (qrContainer.style.display === 'none') {
-                // Generate QR code
-                qrContainer.style.display = 'block';
-                toggleQRButton.textContent = 'Hide QR Code';
-                // Clear previous QR code if any
-                document.getElementById('qr-code').innerHTML = '';
-                
-                try {
+            try {
+                if (qrContainer.style.display === 'none') {
+                    // Show loading state
+                    qrContainer.style.display = 'block';
+                    toggleQRButton.textContent = 'Loading...';
+                    toggleQRButton.disabled = true;
+                    
+                    // Clear previous QR code if any
+                    const qrCanvas = document.getElementById('qr-code');
+                    qrCanvas.innerHTML = '';
+                    
                     // Ensure QR code script is loaded
                     await this.loadQRCodeScript();
+                    console.log('QR code script loaded successfully');
                     
-                    // Create new QR code
-                    if (this.wallet) {
-                        new QRCode(document.getElementById('qr-code'), {
+                    if (!this.wallet || !this.wallet.walletPublicKey) {
+                        throw new Error('No wallet public key available');
+                    }
+                    
+                    // Create new QR code with error handling
+                    try {
+                        // Clear any existing QR code first
+                        qrCanvas.innerHTML = '';
+                        
+                        // Create QR code instance
+                        const qr = new QRCode(qrCanvas, {
                             text: this.wallet.walletPublicKey,
                             width: 128,
                             height: 128,
                             colorDark: "#00FF00",
-                            colorLight: "#001100"
+                            colorLight: "#001100",
+                            correctLevel: QRCode.CorrectLevel.H
                         });
+                        
+                        console.log('QR code generated successfully');
+                        toggleQRButton.textContent = 'Hide QR Code';
+                        
+                        // Force a small delay to ensure rendering
+                        setTimeout(() => {
+                            qrContainer.style.display = 'block';
+                        }, 100);
+                    } catch (qrError) {
+                        console.error('QR code generation failed:', qrError);
+                        qrCanvas.innerHTML = 'Failed to generate QR code';
+                        qrContainer.style.display = 'none';
                     }
-                } catch (error) {
-                    console.error('Failed to generate QR code:', error);
-                    qrContainer.textContent = 'Failed to generate QR code';
+                } else {
+                    // Clear and hide QR code
+                    qrContainer.style.display = 'none';
+                    toggleQRButton.textContent = 'Show QR Code';
+                    document.getElementById('qr-code').innerHTML = '';
                 }
-            } else {
-                // Clear and hide QR code
+            } catch (error) {
+                console.error('Error in QR code toggle:', error);
                 qrContainer.style.display = 'none';
                 toggleQRButton.textContent = 'Show QR Code';
-                document.getElementById('qr-code').innerHTML = '';
+                document.getElementById('qr-code').innerHTML = 'Error: ' + error.message;
+            } finally {
+                toggleQRButton.disabled = false;
             }
         });
 
