@@ -3,6 +3,7 @@ class TokenSniper {
         // Default settings
         this.targetDevWallets = [];
         this.targetTokenNames = [];
+        this.targetSymbols = [];
         this.isActive = false;
 
         // Bind methods
@@ -10,6 +11,7 @@ class TokenSniper {
         this.toggleSniper = this.toggleSniper.bind(this);
         this.updateDevWallets = this.updateDevWallets.bind(this);
         this.updateTokenNames = this.updateTokenNames.bind(this);
+        this.updateSymbols = this.updateSymbols.bind(this);
 
         // Setup UI and listeners
         this.setupUI();
@@ -18,6 +20,7 @@ class TokenSniper {
         // Load saved settings
         this.loadSavedWallet();
         this.loadSavedTokenNames();
+        this.loadSavedSymbols();
         this.loadTradeSettings();
     }
 
@@ -34,6 +37,10 @@ class TokenSniper {
         // Token name input
         this.tokenNamesInput = document.getElementById('token-names');
         this.tokenNamesInput.placeholder = 'Enter token names to snipe (one per line)';
+        
+        // Symbol input
+        this.symbolsInput = document.getElementById('token-symbols');
+        this.symbolsInput.placeholder = 'Enter token symbols to snipe (one per line)';
     }
 
     setupListeners() {
@@ -47,6 +54,10 @@ class TokenSniper {
         // Save token names on change
         this.tokenNamesInput.addEventListener('change', this.updateTokenNames);
         this.tokenNamesInput.addEventListener('input', this.updateTokenNames);
+
+        // Save symbols on change
+        this.symbolsInput.addEventListener('change', this.updateSymbols);
+        this.symbolsInput.addEventListener('input', this.updateSymbols);
 
         // Update trade settings
         document.getElementById('update-settings').addEventListener('click', () => {
@@ -134,8 +145,8 @@ class TokenSniper {
     }
 
     toggleSniper() {
-        if (this.targetDevWallets.length === 0 && this.targetTokenNames.length === 0) {
-            this.displayMessage('Please enter at least one dev wallet address or token name', 'error');
+        if (this.targetDevWallets.length === 0 && this.targetTokenNames.length === 0 && this.targetSymbols.length === 0) {
+            this.displayMessage('Please enter at least one dev wallet address, token name, or symbol', 'error');
             return;
         }
 
@@ -174,9 +185,36 @@ class TokenSniper {
         localStorage.setItem('sniperTokenNames', JSON.stringify(names));
     }
 
+    loadSavedSymbols() {
+        const saved = localStorage.getItem('sniperSymbols');
+        if (saved) {
+            this.targetSymbols = JSON.parse(saved);
+            this.symbolsInput.value = this.targetSymbols.join('\n');
+        }
+    }
+
+    updateSymbols() {
+        const input = this.symbolsInput.value;
+        
+        // Check for invalid format (commas)
+        if (input.includes(',')) {
+            this.displayMessage('Invalid format: Please enter each symbol on a new line', 'error');
+            return;
+        }
+
+        const symbols = input
+            .split('\n')
+            .map(s => s.trim())
+            .filter(s => s.length > 0);
+            
+        // Always update both the instance variable and localStorage
+        this.targetSymbols = symbols;
+        localStorage.setItem('sniperSymbols', JSON.stringify(symbols));
+    }
+
     async handleTokenFound(tokenData) {
         if (!this.isActive) return;
-        if (this.targetDevWallets.length === 0 && this.targetTokenNames.length === 0) return;
+        if (this.targetDevWallets.length === 0 && this.targetTokenNames.length === 0 && this.targetSymbols.length === 0) return;
 
         // Check if token is from any of the target dev wallets
         const isTargetWallet = this.targetDevWallets.includes(tokenData.traderPublicKey);
@@ -187,8 +225,14 @@ class TokenSniper {
             tokenNameLower.includes(targetName.toLowerCase())
         );
 
-        if (isTargetWallet || isTargetName) {
-            const matchType = isTargetWallet ? 'dev wallet' : 'token name';
+        // Check if token symbol matches exactly (case sensitive)
+        const isTargetSymbol = this.targetSymbols.includes(tokenData.symbol);
+
+        if (isTargetWallet || isTargetName || isTargetSymbol) {
+            let matchType = 'unknown';
+            if (isTargetWallet) matchType = 'dev wallet';
+            else if (isTargetName) matchType = 'token name';
+            else if (isTargetSymbol) matchType = 'symbol';
             this.displayMessage(`Target ${matchType} detected! Token: ${tokenData.symbol} (${tokenData.name})`, 'info');
 
             // Get wallet data
