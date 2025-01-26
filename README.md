@@ -5,6 +5,7 @@ A high-performance sniper tool for pump.fun tokens, designed to execute trades w
 ## Overview
 
 PumpSniper provides a no-code solution for sniping tokens on pump.fun, often executing trades before they even appear on the pump.fun UI. This is achieved through an advanced backend system that intelligently routes transactions through the most optimal providers (including Jito, NextBlock, and others).
+**Sniping Criteria**: Snipe by: Dev wallet address, Token Symbol (If you know one is launching soon, set the symbol) , or token name (for instance if you want to snipe all tokens with "AI", put AI in the token name.) You can set multiple dev wallets or other criteria by entering one per line. 
 
 ## Key Features
 
