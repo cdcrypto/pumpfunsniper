@@ -10,7 +10,7 @@ Note: will add balances and transaction log in near future.
 
 PumpSniper enables automated token sniping on pump.fun through a custom monitoring system that tracks new token launches based on multiple criteria. The system utilizes a custom WebSocket feed for real-time updates, providing faster execution compared to traditional UI-based monitoring. Typically you can snipe tokens before they even appear on pump.fun. 
 
-Q: Why cant I import my owm wallet? 
+Q: Why cant I import my own wallet? 
 The transactions and feed use paid services like geyser RPCs which are costly and limit to one IP address to use. Unless you have these, you would not be able to execute at the same speeds as this repo. I have made a custom backend for streaming token feed and execution, and each wallet generated is correlated with a custom API key. You can still import generated wallets to phantom and use them as you normally would to transfer assets out after sniping or perform swaps on phantom / jupiter. Ensure to backup generated wallets since we do not have access to recover keypairs. 
 
 ## Sniping Criteria
